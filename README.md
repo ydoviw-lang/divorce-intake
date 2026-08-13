@@ -35,6 +35,29 @@ That's it — your intake form and dashboard are now live on the internet,
 backed by a real database. Send clients to `your-project.vercel.app/intake`.
 You log in at `your-project.vercel.app/dashboard`.
 
+## Updating an already-deployed app (document generation)
+This version adds a **"Generate documents"** button on approved packets in
+your dashboard. It downloads a zip containing three of the official NY
+uncontested divorce forms (Summons with Notice, Verified Complaint, Sworn
+Affirmation of Plaintiff), pre-filled from the client's intake answers,
+following the exact structure and legal language of the official forms
+published at nycourts.gov (Rev. 3/1/26) — plus a checklist of what still
+needs manual confirmation before filing (county, residency basis, military
+status, etc.).
+
+No new environment variables are needed for this update — just push the
+updated code to GitHub the same way as before (Add file → Upload files),
+and Vercel will redeploy automatically.
+
+**Important:** this covers the three documents that *start* a case. The
+remaining forms in the full packet (Affirmation of Service, Note of Issue,
+Findings of Fact, Judgment of Divorce, Certificate of Dissolution, and the
+rest) aren't generated yet — that's the natural next phase of this feature.
+Also worth knowing: NY's official forms are plain documents, not fillable
+PDFs, so this generates Word documents that reproduce their exact text and
+structure rather than "filling in" the court's own PDF — which is the
+standard, accurate way this is done in practice.
+
 ## Updating an already-deployed app (adding SSN/DOB fields)
 This version adds date of birth, Social Security Number, maiden name, and
 email for both spouses — required for NY's Certificate of Dissolution.

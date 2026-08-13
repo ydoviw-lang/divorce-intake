@@ -46,6 +46,17 @@ export default function Dashboard() {
 
   const logout = async () => { await fetch('/api/logout', { method: 'POST' }); router.push('/login'); };
 
+  const generateDocuments = async () => {
+    const res = await fetch(`/api/packets/${activeFile}/generate-documents`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+    if (!res.ok) { alert('Could not generate documents — packet must be approved first.'); return; }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${activeFile}-documents.zip`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   if (loading) return <div className="wrap">Loading…</div>;
 
   return (
@@ -115,6 +126,7 @@ export default function Dashboard() {
                 <button className="act approve" onClick={() => setStatus('approved')}>Approve for drafting</button>
                 <button className="act changes" onClick={() => setStatus('changes_requested')}>Request changes</button>
                 <button className="act" onClick={() => setStatus('delivered')} disabled={active.status !== 'approved'}>Mark delivered</button>
+                <button className="act" onClick={generateDocuments} disabled={active.status !== 'approved' && active.status !== 'delivered'} style={{ background: 'var(--brass)', color: 'var(--white)', borderColor: 'var(--brass)' }}>Generate documents</button>
               </div>
             </>
           )}
