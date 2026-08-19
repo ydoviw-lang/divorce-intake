@@ -1,6 +1,6 @@
-import { useState } from 'react';
-
-const STEPS = ['Eligibility', 'Spouses & Marriage', 'Children', 'Property & Support', 'Name Change', 'Review'];
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { T, optLabel } from '../lib/i18n';
 
 const EMPTY = {
   residency: '',
@@ -11,18 +11,25 @@ const EMPTY = {
   maintenance: '', maintenanceNotes: '', nameChange: '', newName: ''
 };
 
-function Pills({ value, onChange, options }) {
+function Pills({ value, onChange, options, lang }) {
   return (
     <div className="radio-group">
       {options.map(o => (
         <div key={o} className={`radio-pill ${value === o ? 'selected' : ''}`}
-          onClick={() => onChange(o)}>{o}</div>
+          onClick={() => onChange(o)}>{optLabel(o, lang)}</div>
       ))}
     </div>
   );
 }
 
 export default function Intake() {
+  const router = useRouter();
+  const [lang, setLang] = useState('en');
+  useEffect(() => {
+    if (router.query.lang === 'es') setLang('es');
+  }, [router.query.lang]);
+  const t = T[lang];
+
   const [step, setStep] = useState(0);
   const [data, setData] = useState(EMPTY);
   const [submitting, setSubmitting] = useState(false);
@@ -71,8 +78,8 @@ export default function Intake() {
     return (
       <div className="wrap">
         <div className="sheet" style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <h2 style={{ fontFamily: 'Fraunces, serif' }}>Packet received for review</h2>
-          <p style={{ color: 'var(--ink-soft)' }}>Your file number is <b>{result}</b>. You'll hear back once your documents have been reviewed.</p>
+          <h2 style={{ fontFamily: 'Fraunces, serif' }}>{t.fileReceivedTitle}</h2>
+          <p style={{ color: 'var(--ink-soft)' }}>{t.fileReceivedBody} <b>{result}</b>. {t.fileReceivedBody2}</p>
         </div>
       </div>
     );
@@ -82,13 +89,18 @@ export default function Intake() {
     <div className="wrap">
       <div className="masthead">
         <div>
-          <h1>Uncontested Divorce — Client Intake</h1>
-          <div className="sub">New York State · Domestic Relations Law §170(7)</div>
+          <h1>{t.intakeTitle}</h1>
+          <div className="sub">{t.homeSub}</div>
+        </div>
+        <div>
+          <button className="nav" onClick={() => setLang(lang === 'en' ? 'es' : 'en')}>
+            {lang === 'en' ? 'Español' : 'English'}
+          </button>
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>
-        {STEPS.map((s, i) => (
+        {t.steps.map((s, i) => (
           <div key={s} style={{
             fontFamily: 'IBM Plex Mono, monospace', fontSize: 11, padding: '6px 10px',
             border: '1px solid var(--line)', background: i === step ? 'var(--white)' : 'var(--paper-deep)',
@@ -101,8 +113,8 @@ export default function Intake() {
         {step === 0 && (
           <>
             <div className="field">
-              <label>Residency situation</label>
-              <Pills value={data.residency} onChange={v => set('residency', v)}
+              <label>{t.residencyLabel}</label>
+              <Pills lang={lang} value={data.residency} onChange={v => set('residency', v)}
                 options={['Both spouses live in NY', 'One spouse has lived in NY 1+ year', 'One spouse has lived in NY 2+ years', 'Not sure']} />
             </div>
           </>
@@ -110,49 +122,47 @@ export default function Intake() {
 
         {step === 1 && (
           <>
-            <p style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginTop: -14, marginBottom: 20 }}>
-              Date of birth and Social Security Number are required by NY courts for the Certificate of Dissolution. Your SSN is encrypted the moment you submit this form.
-            </p>
+            <p style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginTop: -14, marginBottom: 20 }}>{t.ssnNotice}</p>
             <div className="row2">
-              <div className="field"><label>Plaintiff full legal name</label>
+              <div className="field"><label>{t.plaintiffName}</label>
                 <input value={data.p1Name} onChange={e => set('p1Name', e.target.value)} /></div>
-              <div className="field"><label>Defendant full legal name</label>
+              <div className="field"><label>{t.defendantName}</label>
                 <input value={data.p2Name} onChange={e => set('p2Name', e.target.value)} /></div>
             </div>
             <div className="row2">
-              <div className="field"><label>Plaintiff maiden name <span style={{fontWeight:400,color:'var(--ink-soft)'}}>(if applicable)</span></label>
+              <div className="field"><label>{t.plaintiffMaiden} <span style={{fontWeight:400,color:'var(--ink-soft)'}}>{t.ifApplicable}</span></label>
                 <input value={data.p1MaidenName} onChange={e => set('p1MaidenName', e.target.value)} /></div>
-              <div className="field"><label>Defendant maiden name <span style={{fontWeight:400,color:'var(--ink-soft)'}}>(if applicable)</span></label>
+              <div className="field"><label>{t.defendantMaiden} <span style={{fontWeight:400,color:'var(--ink-soft)'}}>{t.ifApplicable}</span></label>
                 <input value={data.p2MaidenName} onChange={e => set('p2MaidenName', e.target.value)} /></div>
             </div>
             <div className="row2">
-              <div className="field"><label>Plaintiff date of birth</label>
+              <div className="field"><label>{t.plaintiffDOB}</label>
                 <input type="date" value={data.p1DOB} onChange={e => set('p1DOB', e.target.value)} /></div>
-              <div className="field"><label>Defendant date of birth</label>
+              <div className="field"><label>{t.defendantDOB}</label>
                 <input type="date" value={data.p2DOB} onChange={e => set('p2DOB', e.target.value)} /></div>
             </div>
             <div className="row2">
-              <div className="field"><label>Plaintiff Social Security Number</label>
+              <div className="field"><label>{t.plaintiffSSN}</label>
                 <input value={data.p1SSN} onChange={e => set('p1SSN', e.target.value)} placeholder="XXX-XX-XXXX" /></div>
-              <div className="field"><label>Defendant Social Security Number</label>
+              <div className="field"><label>{t.defendantSSN}</label>
                 <input value={data.p2SSN} onChange={e => set('p2SSN', e.target.value)} placeholder="XXX-XX-XXXX" /></div>
             </div>
             <div className="row2">
-              <div className="field"><label>Plaintiff address</label>
+              <div className="field"><label>{t.plaintiffAddress}</label>
                 <input value={data.p1Address} onChange={e => set('p1Address', e.target.value)} /></div>
-              <div className="field"><label>Defendant address</label>
+              <div className="field"><label>{t.defendantAddress}</label>
                 <input value={data.p2Address} onChange={e => set('p2Address', e.target.value)} /></div>
             </div>
             <div className="row2">
-              <div className="field"><label>Plaintiff email address</label>
+              <div className="field"><label>{t.plaintiffEmail}</label>
                 <input type="email" value={data.p1Email} onChange={e => set('p1Email', e.target.value)} /></div>
-              <div className="field"><label>Defendant email address</label>
+              <div className="field"><label>{t.defendantEmail}</label>
                 <input type="email" value={data.p2Email} onChange={e => set('p2Email', e.target.value)} /></div>
             </div>
             <div className="row2">
-              <div className="field"><label>Date of marriage</label>
+              <div className="field"><label>{t.marriageDate}</label>
                 <input type="date" value={data.marriageDate} onChange={e => set('marriageDate', e.target.value)} /></div>
-              <div className="field"><label>Place of marriage (city, state)</label>
+              <div className="field"><label>{t.marriagePlace}</label>
                 <input value={data.marriagePlace} onChange={e => set('marriagePlace', e.target.value)} /></div>
             </div>
           </>
@@ -161,25 +171,25 @@ export default function Intake() {
         {step === 2 && (
           <>
             <div className="field">
-              <label>Are there children of this marriage under 21?</label>
-              <Pills value={data.hasChildren} onChange={v => set('hasChildren', v)} options={['Yes', 'No']} />
+              <label>{t.childrenQ}</label>
+              <Pills lang={lang} value={data.hasChildren} onChange={v => set('hasChildren', v)} options={['Yes', 'No']} />
             </div>
             {data.hasChildren === 'Yes' && (
               <>
                 {data.children.map((c, i) => (
                   <div key={i} style={{ border: '1px dashed var(--line)', padding: 16, marginBottom: 14 }}>
                     <div className="row2">
-                      <div className="field"><label>Child's full name</label>
+                      <div className="field"><label>{t.childName}</label>
                         <input value={c.name} onChange={e => updateChild(i, 'name', e.target.value)} /></div>
-                      <div className="field"><label>Date of birth</label>
+                      <div className="field"><label>{t.childDOB}</label>
                         <input type="date" value={c.dob} onChange={e => updateChild(i, 'dob', e.target.value)} /></div>
                     </div>
-                    <div className="field"><label>Custody & parenting time arrangement</label>
+                    <div className="field"><label>{t.custodyLabel}</label>
                       <textarea value={c.custody} onChange={e => updateChild(i, 'custody', e.target.value)} /></div>
-                    <button className="nav" onClick={() => removeChild(i)}>Remove</button>
+                    <button className="nav" onClick={() => removeChild(i)}>{t.removeChild}</button>
                   </div>
                 ))}
-                <button className="nav" onClick={addChild}>+ Add child</button>
+                <button className="nav" onClick={addChild}>{t.addChild}</button>
               </>
             )}
           </>
@@ -187,52 +197,46 @@ export default function Intake() {
 
         {step === 3 && (
           <>
-            <div className="field"><label>Is there marital property to divide?</label>
-              <Pills value={data.hasProperty} onChange={v => set('hasProperty', v)} options={['Yes', 'No']} /></div>
-            {data.hasProperty === 'Yes' && <div className="field"><label>Describe the agreed division</label>
+            <div className="field"><label>{t.hasPropertyQ}</label>
+              <Pills lang={lang} value={data.hasProperty} onChange={v => set('hasProperty', v)} options={['Yes', 'No']} /></div>
+            {data.hasProperty === 'Yes' && <div className="field"><label>{t.propertyDescribe}</label>
               <textarea value={data.propertyNotes} onChange={e => set('propertyNotes', e.target.value)} /></div>}
 
-            <div className="field"><label>Are there shared debts to divide?</label>
-              <Pills value={data.hasDebts} onChange={v => set('hasDebts', v)} options={['Yes', 'No']} /></div>
-            {data.hasDebts === 'Yes' && <div className="field"><label>Describe the agreed division</label>
+            <div className="field"><label>{t.hasDebtsQ}</label>
+              <Pills lang={lang} value={data.hasDebts} onChange={v => set('hasDebts', v)} options={['Yes', 'No']} /></div>
+            {data.hasDebts === 'Yes' && <div className="field"><label>{t.debtsDescribe}</label>
               <textarea value={data.debtNotes} onChange={e => set('debtNotes', e.target.value)} /></div>}
 
-            <div className="field"><label>Has either spouse agreed to pay maintenance?</label>
-              <Pills value={data.maintenance} onChange={v => set('maintenance', v)} options={['Yes', 'No']} /></div>
-            {data.maintenance === 'Yes' && <div className="field"><label>Amount and duration agreed</label>
+            <div className="field"><label>{t.maintenanceQ}</label>
+              <Pills lang={lang} value={data.maintenance} onChange={v => set('maintenance', v)} options={['Yes', 'No']} /></div>
+            {data.maintenance === 'Yes' && <div className="field"><label>{t.maintenanceAmount}</label>
               <input value={data.maintenanceNotes} onChange={e => set('maintenanceNotes', e.target.value)} /></div>}
           </>
         )}
 
         {step === 4 && (
           <>
-            <div className="field"><label>Would either spouse like to change their name?</label>
-              <Pills value={data.nameChange} onChange={v => set('nameChange', v)} options={['Yes', 'No']} /></div>
-            {data.nameChange === 'Yes' && <div className="field"><label>Name to resume/change to</label>
+            <div className="field"><label>{t.nameChangeQ}</label>
+              <Pills lang={lang} value={data.nameChange} onChange={v => set('nameChange', v)} options={['Yes', 'No']} /></div>
+            {data.nameChange === 'Yes' && <div className="field"><label>{t.newNameLabel}</label>
               <input value={data.newName} onChange={e => set('newName', e.target.value)} /></div>}
           </>
         )}
 
         {step === 5 && (
           <div style={{ fontSize: 13.5, lineHeight: 1.8 }}>
-            <p><b>{data.p1Name}</b> & <b>{data.p2Name}</b> — married {data.marriageDate} in {data.marriagePlace}</p>
-            <p>DOB: {data.p1DOB} / {data.p2DOB} · SSN on file: {data.p1SSN ? '••••' + data.p1SSN.slice(-4) : '—'} / {data.p2SSN ? '••••' + data.p2SSN.slice(-4) : '—'}</p>
-            <p>Residency: {data.residency}</p>
-            <p>Children: {data.hasChildren}{data.children.length > 0 && ` (${data.children.length})`}</p>
-            <p>Property: {data.hasProperty} · Debts: {data.hasDebts} · Maintenance: {data.maintenance}</p>
-            <p>Name change: {data.nameChange}{data.newName && ` → ${data.newName}`}</p>
+            <p><b>{data.p1Name}</b> & <b>{data.p2Name}</b> — {t.reviewMarried} {data.marriageDate} {t.reviewIn} {data.marriagePlace}</p>
+            <p>{t.reviewDOBLine}: {data.p1DOB} / {data.p2DOB} · {t.reviewSSNLine}: {data.p1SSN ? '••••' + data.p1SSN.slice(-4) : '—'} / {data.p2SSN ? '••••' + data.p2SSN.slice(-4) : '—'}</p>
+            <p>{t.reviewResidency}: {optLabel(data.residency, lang)}</p>
+            <p>{t.reviewChildren}: {optLabel(data.hasChildren, lang)}{data.children.length > 0 && ` (${data.children.length})`}</p>
+            <p>{t.reviewProperty}: {optLabel(data.hasProperty, lang)} · {t.reviewDebts}: {optLabel(data.hasDebts, lang)} · {t.reviewMaintenance}: {optLabel(data.maintenance, lang)}</p>
+            <p>{t.reviewNameChange}: {optLabel(data.nameChange, lang)}{data.newName && ` → ${data.newName}`}</p>
           </div>
         )}
 
         {error && <p className="error-text">{error}</p>}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 28, paddingTop: 18, borderTop: '1px solid var(--line)' }}>
-          <button className="nav" disabled={step === 0} onClick={() => setStep(s => s - 1)}>← Back</button>
-          {step < STEPS.length - 1
-            ? <button className="nav primary" disabled={!canAdvance()} onClick={() => setStep(s => s + 1)}>Continue →</button>
-            : <button className="nav primary" disabled={submitting} onClick={submit}>{submitting ? 'Submitting…' : 'Submit for review'}</button>}
-        </div>
-      </div>
-    </div>
-  );
-}
+          <button className="nav" disabled={step === 0} onClick={() => setStep(s => s - 1)}>{t.back}</button>
+          {step < t.steps.length - 1
+            ? <button className="nav primary" disabled={!canAdvance()}
