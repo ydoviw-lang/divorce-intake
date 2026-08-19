@@ -239,4 +239,10 @@ export default function Intake() {
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 28, paddingTop: 18, borderTop: '1px solid var(--line)' }}>
           <button className="nav" disabled={step === 0} onClick={() => setStep(s => s - 1)}>{t.back}</button>
           {step < t.steps.length - 1
-            ? <button className="nav primary" disabled={!canAdvance()}
+            ? <button className="nav primary" disabled={!canAdvance()} onClick={() => setStep(s => s + 1)}>{t.continueBtn}</button>
+            : <button className="nav primary" disabled={submitting} onClick={submit}>{submitting ? t.submitting : t.submitBtn}</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
